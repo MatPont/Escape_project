@@ -12,6 +12,9 @@ public class Environment {
 	int num_button;
 	int code_size;
 	
+	int real_button = 0;
+	int real_door = 0;
+	
 	public Environment(boolean use_FX_Viewer, int code_size) {
 		this.use_FX_Viewer = use_FX_Viewer;
 		if(use_FX_Viewer)
@@ -36,10 +39,11 @@ public class Environment {
 	}
 	
 	public int pressButton(int num_button) {
-		int result = 1;
+		boolean good_button = (num_button == real_button); 
+		int result = good_button ? 1 : 0;
 		
 		this.num_button = num_button;
-		viewer.pressButtonAnimation(coord_actuator, coord_runner, runner_room, num_button);
+		viewer.pressButtonAnimation(coord_actuator, coord_runner, runner_room, num_button, good_button);
 		
 		return result;
 	}
@@ -47,15 +51,19 @@ public class Environment {
 	public int[][] getCode(){
 		int[][] code = new int[code_size][code_size];
 		
+		this.real_button = (int) (Math.random() * (4));
+		this.real_door = (int) (Math.random() * (2));
+		
 		viewer.getCodeAnimation(coord_actuator, coord_runner, runner_room);
 		
 		return code;
 	}
 	
 	public int openDoor(int num_door) {
-		int result = 1;
+		boolean good_door = (num_door == real_door);
+		int result = (good_door) ? 1 : 0;
 		
-		viewer.openDoorAnimation(coord_actuator, coord_runner, runner_room, num_door);
+		viewer.openDoorAnimation(coord_actuator, coord_runner, runner_room, num_door, good_door);
 		
 		if(result == 1) {
 			runner_room = (runner_room + 1) % 2;
@@ -63,6 +71,8 @@ public class Environment {
 		} else {
 			runner_room = 0;
 			this.init_coord_runner();
+			this.display();
+			this.viewer.pause(1000);
 		}
 		
 		return result;

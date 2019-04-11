@@ -11,7 +11,7 @@ public class SimpleViewer implements Viewer {
 	private final static String empty = " ";
 	private final static String code = "C";
 	
-	private final static long pause_time = 666;
+	private final static long pause_time = 500;
 	
 	public SimpleViewer() {
 		super();
@@ -22,7 +22,7 @@ public class SimpleViewer implements Viewer {
 			System.out.println();
 	} 
 	
-	public static void pause(long time) {
+	public void pause(long time) {
 		try {
 			Thread.sleep(time);
 		} catch (InterruptedException e) {
@@ -31,10 +31,10 @@ public class SimpleViewer implements Viewer {
 		}
 	}
 	
-	public void display_message_pause(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button, String message) {
+	public void display_message_pause(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button, String message, long pause) {
 		this.display(coord_actuator, coord_runner, runner_room, num_button);
     	System.out.println(message);
-    	this.pause(pause_time);
+    	this.pause(pause);
 	}
 	
 	// ======= Viewer implementation =======
@@ -94,12 +94,13 @@ public class SimpleViewer implements Viewer {
     
     public void getCodeAnimation(int[] coord_actuator, int[] coord_runner, int runner_room) {
     	coord_runner[1] += (runner_room == 0) ? 1 : -1;
-    	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "the code was obtained by the Runner!");
+    	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "the code was obtained by the Runner!", pause_time);
     	coord_runner[1] += (runner_room == 0) ? -1 : 1;
     	this.display(coord_actuator, coord_runner, runner_room, -1);
     }
     
-    public void pressButtonAnimation(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button) {
+    public void pressButtonAnimation(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button, boolean good_button) {
+    	String message = "";
     	switch(num_button) {
     		case 0:
     			coord_actuator[1] -= 1;
@@ -114,7 +115,7 @@ public class SimpleViewer implements Viewer {
     			coord_actuator[1] += 1;
     			break;
     	}
-    	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+    	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
 		
 		switch(num_button) {
 			case 0:
@@ -124,14 +125,14 @@ public class SimpleViewer implements Viewer {
 				coord_actuator[1] += 1;
 				break;
 		}
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
 		
 		coord_actuator[0] -= 1;
-		String message = "the button "+num_button+" was pushed by the Actuator!";
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, num_button, message);
+		message = "the button "+num_button+" was pushed by the Actuator!";
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, num_button, message, pause_time);
 		
 		coord_actuator[0] += 1;
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
 		
 		// Return to start position
 		switch(num_button) {
@@ -148,7 +149,7 @@ public class SimpleViewer implements Viewer {
 				coord_actuator[1] -= 1;
 				break;
 		}
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
 		
 		switch(num_button) {
 			case 0:
@@ -158,10 +159,13 @@ public class SimpleViewer implements Viewer {
 				coord_actuator[1] -= 1;
 				break;
 		}
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		
+		message = (good_button) ? "Correct button!" : "Wrong button!";
+		
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, message, pause_time);
     }
     
-    public void openDoorAnimation(int[] coord_actuator, int[] coord_runner, int runner_room, int num_door) {
+    public void openDoorAnimation(int[] coord_actuator, int[] coord_runner, int runner_room, int num_door, boolean good_door) {
     	switch(num_door) {
 			case 0:
 				coord_runner[0] -= 1;
@@ -170,21 +174,24 @@ public class SimpleViewer implements Viewer {
 				coord_runner[0] += 1;
 				break;
     	}
-    	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+    	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
     	
     	coord_runner[1] += (runner_room == 0) ? 1 : -1;
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
 		
 		coord_runner[1] += (runner_room == 0) ? 1 : -1;
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "Runner open the door "+num_door);
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "Runner open the door "+num_door, pause_time);
+		
+		if(!good_door)
+			this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "This was the wrong door, runner agent died!", pause_time*3);
     }
     
     public void changeRoomAnimation(int[] coord_actuator, int[] coord_runner, int runner_room, int num_door) {
     	coord_runner[1] += (runner_room == 0) ? -1 : 1;
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
 		
 		coord_runner[1] += (runner_room == 0) ? -1 : 1;
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
 		
 		switch(num_door) {
 		case 0:
@@ -194,6 +201,6 @@ public class SimpleViewer implements Viewer {
 			coord_runner[0] -= 1;
 			break;
 		}
-		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
     }
 }

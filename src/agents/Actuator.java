@@ -1,5 +1,8 @@
 package agents;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import escape_environment.Environment;
 import jade.core.AID;
 import jade.core.Agent;
@@ -23,6 +26,8 @@ public class Actuator extends Agent {
 	private int[][] code = new int[code_size][code_size];
 	private int num_button = 0;
 	private int num_door = 0;
+	
+	private Set<Integer> already_pushed_button = new HashSet<>();
 	
 	protected void setup() {
 		// Process parameters
@@ -78,12 +83,18 @@ public class Actuator extends Agent {
 
 	private int decipher_button(int[][] code) {
 		int num_button = 0;
+		do {
+			num_button = (int) (Math.random() * (4));
+		}while(already_pushed_button.contains(num_button));
+		
+		already_pushed_button.add(num_button);
 		
 		return num_button;
 	}
 	
 	private int decipher_door(int[][] code) {
-		int num_door = 0;
+		//int num_door = 0;
+		int num_door = (int) (Math.random() * (2));
 		
 		return num_door;
 	}
@@ -112,6 +123,8 @@ public class Actuator extends Agent {
 					j = 0;
 				}
 			}
+			
+			already_pushed_button.clear();
 		}		
 	}
 	
@@ -119,7 +132,7 @@ public class Actuator extends Agent {
 		public void action() {
 			if(verbose) System.out.println(getName()+" - "+STATE_B);
 			
-			// Action			
+			// Action
 			num_button = decipher_button(code);
 		}
 	}
@@ -132,7 +145,7 @@ public class Actuator extends Agent {
 			
 			// Action
 			exit_value = env.pressButton(num_button);
-			if(exit_value == 1)
+			if(exit_value == 1) 
 				num_door = decipher_door(code);
 		}
 		

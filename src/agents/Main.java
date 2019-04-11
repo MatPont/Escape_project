@@ -27,12 +27,14 @@ public class Main {
 		
 		Environment env = new Environment(false, code_size);
 		env.display();
+		System.out.println("Press a key to run the game!");
 		try {
 			System.in.read();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
 		
 		Object[] actuator_param = {runner_name, env, code_size, verbose};
 		Object[] runner_param = {actuator_name, env, code_size, verbose};
