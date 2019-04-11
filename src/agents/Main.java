@@ -11,28 +11,31 @@ import jade.wrapper.StaleProxyException;
 public class Main {
 
 	public static void main(String[] args) {
-		/*Runtime runtime = Runtime.instance();
+		Runtime runtime = Runtime.instance();
 		Profile config = new ProfileImpl("localhost", 8888, null);
-		config.setParameter("gui", "true");
+		config.setParameter("gui", "false");
 		AgentContainer mc = runtime.createMainContainer(config);
-		AgentController actuator, runner;*/
+		AgentController actuator, runner;
 		
-		Environment env = new Environment(false);
+		String actuator_name = "ActuatorAgent";
+		String runner_name = "RunnerAgent";
+		
+		int code_size = 4;
+		
+		Environment env = new Environment(false, code_size);
 		env.display();
 		
-		/*try {
-			String tab[] = {"string", "bonjour", "iufheui"};
-			//ac = mc.createNewAgent("agent1", HelloAgent.class.getName(), (Object[])tab);
-			//ac = mc.createNewAgent("agent1", MyAgent.class.getName(), (Object[])tab);
-			//ac = mc.createNewAgent("agent1", FSMAgent.class.getName(), (Object[])tab);
+		Object[] actuator_param = {runner_name, env, code_size};
+		Object[] runner_param = {actuator_name, env, code_size};
+		
+		try {
+			actuator = mc.createNewAgent(actuator_name, Actuator.class.getName(), actuator_param);
+			runner = mc.createNewAgent(runner_name, Runner.class.getName(), runner_param);
 			
-			a = mc.createNewAgent("AgentA", AgentA.class.getName(), (Object[])tab);
-			b = mc.createNewAgent("AgentB", AgentB.class.getName(), (Object[])tab);
-			
-			a.start();
-			b.start();
+			actuator.start();
+			runner.start();
 		} catch(StaleProxyException e) {
 			
-		}*/
+		}
 	}
 }

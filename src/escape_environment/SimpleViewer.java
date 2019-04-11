@@ -5,7 +5,7 @@ import java.io.IOException;
 public class SimpleViewer implements Viewer {
 	private final static String switch_on = "*";
 	private final static String switch_off = "o";
-	private final static String agent = "x";
+	private final static String agent = "X";
 	private final static String wall = "#";
 	private final static String door = "H";
 	private final static String empty = " ";
