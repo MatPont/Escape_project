@@ -17,6 +17,7 @@ public class Runner extends Agent {
 	
 	private String actuator_agent_name;
 	private Environment env;
+	private boolean verbose;
 	
 	private int code_size;
 	private int[][] code;
@@ -27,8 +28,9 @@ public class Runner extends Agent {
 		Object args[] = getArguments();
 		actuator_agent_name = args[0].toString();
 		env = (Environment)args[1];
-		
 		code_size = (int)args[2];
+		verbose = (boolean)args[3];
+		
 		code = new int[code_size][code_size];
 		
 		// Declare FSM Behaviour
@@ -56,6 +58,7 @@ public class Runner extends Agent {
 	}	
 	
 	private void sendMessage(String agent_name, String content) {
+		if(verbose) System.out.println("envoi à "+agent_name+" : "+content);
 		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 		msg.addReceiver(new AID(agent_name, AID.ISLOCALNAME));
 		msg.setContent(content);
@@ -63,11 +66,18 @@ public class Runner extends Agent {
 	}
 	
 	private String receiveMessage() {
+		//System.out.println("2 - doWait before");
+		doWait();
+		//System.out.println("2 - doWait after");
+		
+		/*try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		
 		ACLMessage msg = receive();
-		if(msg == null) {
-			doWait();
-			msg = receive();	
-		}
 		String content = "";
 		if(msg != null)
 			content = msg.getContent();
@@ -79,44 +89,44 @@ public class Runner extends Agent {
 	   ================== */
 	private class FindCode extends OneShotBehaviour {
 		public void action() {
-			System.out.println(getName()+" - "+STATE_A);
+			if(verbose) System.out.println(getName()+" - "+STATE_A);
 			
-			// Action			
+			// Action
 			code = env.getCode();
 		}
 	}
 	
 	private class SendCode extends OneShotBehaviour {
 		public void action() {
-			System.out.println(getName()+" - "+STATE_B);
+			if(verbose) System.out.println(getName()+" - "+STATE_B);
 			
 			// Action			
 			String string_code = "";
-			for(int[] code_line : code) {
-				for(int c : code_line) {
-					string_code += c;
-				}
-			}
+			for(int[] code_line : code) 
+				for(int c : code_line) 
+					string_code += c+",";
 			sendMessage(actuator_agent_name, string_code);
 		}
 	}
 	
 	private class WaitDoorNumber extends OneShotBehaviour {
 		public void action() {
-			System.out.println(getName()+" - "+STATE_C);
+			if(verbose) System.out.println(getName()+" - "+STATE_C);
 			
-			// Action			
+			// Action
 			String msg_door = receiveMessage();
+			if(verbose) System.out.println("door "+msg_door);
 			num_door = Integer.parseInt(msg_door);
 		}
 	}
 	
 	private class OpenDoor extends OneShotBehaviour {
 		public void action() {
-			System.out.println(getName()+" - "+STATE_D);
+			if(verbose) System.out.println(getName()+" - "+STATE_D);
 			
 			// Action			
 			int result = env.openDoor(num_door);
+			
 		}
 	}
 	

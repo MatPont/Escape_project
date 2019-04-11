@@ -17,6 +17,7 @@ public class Actuator extends Agent {
 	
 	private String runner_agent_name;
 	private Environment env;
+	private boolean verbose;
 	
 	private int code_size = 4;
 	private int[][] code = new int[code_size][code_size];
@@ -28,6 +29,10 @@ public class Actuator extends Agent {
 		Object args[] = getArguments();
 		runner_agent_name = args[0].toString();
 		env = (Environment)args[1];
+		code_size = (int)args[2];
+		verbose = (boolean)args[3];
+		
+		code = new int[code_size][code_size];
 		
 		// Declare FSM Behaviour
 		FSMBehaviour fsm = new FSMBehaviour() {
@@ -55,6 +60,7 @@ public class Actuator extends Agent {
 	}
 	
 	private void sendMessage(String agent_name, String content) {
+		if(verbose) System.out.println("envoi à "+agent_name+" : "+content);
 		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 		msg.addReceiver(new AID(agent_name, AID.ISLOCALNAME));
 		msg.setContent(content);
@@ -62,11 +68,8 @@ public class Actuator extends Agent {
 	}
 	
 	private String receiveMessage() {
+		doWait();
 		ACLMessage msg = receive();
-		if(msg == null) {
-			doWait();
-			msg = receive();	
-		}
 		String content = "";
 		if(msg != null)
 			content = msg.getContent();
@@ -90,10 +93,11 @@ public class Actuator extends Agent {
 	   ================== */
 	private class WaitCode extends OneShotBehaviour {
 		public void action() {
-			System.out.println(getName()+" - "+STATE_A);
+			if(verbose) System.out.println(getName()+" - "+STATE_A);
 			
 			// Action
 			String msg_code = receiveMessage();
+			if(verbose) System.out.println("door "+msg_code);
 			String[] split_code = msg_code.split(",");
 			// Parse code
 			int i = 0;
@@ -103,6 +107,8 @@ public class Actuator extends Agent {
 				j += 1;
 				if(j >= code_size){
 					i = (i + 1) % code_size;
+					if(i >= code_size)
+						break;
 					j = 0;
 				}
 			}
@@ -111,7 +117,7 @@ public class Actuator extends Agent {
 	
 	private class Decipher extends OneShotBehaviour {
 		public void action() {
-			System.out.println(getName()+" - "+STATE_B);
+			if(verbose) System.out.println(getName()+" - "+STATE_B);
 			
 			// Action			
 			num_button = decipher_button(code);
@@ -122,7 +128,7 @@ public class Actuator extends Agent {
 		private int exit_value;
 		
 		public void action() {
-			System.out.println(getName()+" - "+STATE_C);
+			if(verbose) System.out.println(getName()+" - "+STATE_C);
 			
 			// Action
 			exit_value = env.pressButton(num_button);
@@ -137,7 +143,7 @@ public class Actuator extends Agent {
 	
 	private class SendDoorNumber extends OneShotBehaviour {
 		public void action() {
-			System.out.println(getName()+" - "+STATE_D);
+			if(verbose) System.out.println(getName()+" - "+STATE_D);
 			
 			// Action			
 			String string_door = String.valueOf(num_door);

@@ -3,13 +3,15 @@ package escape_environment;
 import java.io.IOException;
 
 public class SimpleViewer implements Viewer {
-	private final static String switch_on = "*";
+	private final static String switch_on = "¤";
 	private final static String switch_off = "o";
 	private final static String agent = "X";
 	private final static String wall = "#";
 	private final static String door = "H";
 	private final static String empty = " ";
 	private final static String code = "C";
+	
+	private final static long pause_time = 666;
 	
 	public SimpleViewer() {
 		super();
@@ -20,11 +22,26 @@ public class SimpleViewer implements Viewer {
 			System.out.println();
 	} 
 	
+	public static void pause(long time) {
+		try {
+			Thread.sleep(time);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void display_message_pause(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button, String message) {
+		this.display(coord_actuator, coord_runner, runner_room, num_button);
+    	System.out.println(message);
+    	this.pause(pause_time);
+	}
+	
 	// ======= Viewer implementation =======
-    public void display(int[] coord_actuator, int[] coord_runner, int runner_room, int switch_on_id) {
+    public void display(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button) {
     	int num_row = 5;
     	
-    	//this.clearScreen();
+    	this.clearScreen();
     	String[] lines = new String[num_row];
     	for(int i = 0 ; i < num_row; ++i) {
 			lines[i] = "";
@@ -37,7 +54,7 @@ public class SimpleViewer implements Viewer {
     		}else if(i == 1) {
     			lines[i] += wall;
     			for(int j = 0 ; j < 5 ; ++j)
-    				lines[i] += (j == switch_on_id) ? switch_on : switch_off;
+    				lines[i] += (j == num_button) ? switch_on : switch_off;
     			lines[i] += wall;
     			lines[i] += empty;
     			if(runner_room == 0) 
@@ -73,5 +90,110 @@ public class SimpleViewer implements Viewer {
     	for(int i = 0 ; i < num_row; ++i) {
     		System.out.println(lines[i]);
     	}
+    }
+    
+    public void getCodeAnimation(int[] coord_actuator, int[] coord_runner, int runner_room) {
+    	coord_runner[1] += (runner_room == 0) ? 1 : -1;
+    	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "the code was obtained by the Runner!");
+    	coord_runner[1] += (runner_room == 0) ? -1 : 1;
+    	this.display(coord_actuator, coord_runner, runner_room, -1);
+    }
+    
+    public void pressButtonAnimation(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button) {
+    	switch(num_button) {
+    		case 0:
+    			coord_actuator[1] -= 1;
+    			break;
+    		case 1:
+    			coord_actuator[1] -= 1;
+    			break;
+    		case 4:
+    			coord_actuator[1] += 1;
+    			break;
+    		case 3:
+    			coord_actuator[1] += 1;
+    			break;
+    	}
+    	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		
+		switch(num_button) {
+			case 0:
+				coord_actuator[1] -= 1;
+				break;
+			case 4:
+				coord_actuator[1] += 1;
+				break;
+		}
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		
+		coord_actuator[0] -= 1;
+		String message = "the button "+num_button+" was pushed by the Actuator!";
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, num_button, message);
+		
+		coord_actuator[0] += 1;
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		
+		// Return to start position
+		switch(num_button) {
+			case 0:
+				coord_actuator[1] += 1;
+				break;
+			case 1:
+				coord_actuator[1] += 1;
+				break;
+			case 4:
+				coord_actuator[1] -= 1;
+				break;
+			case 3:
+				coord_actuator[1] -= 1;
+				break;
+		}
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		
+		switch(num_button) {
+			case 0:
+				coord_actuator[1] += 1;
+				break;
+			case 4:
+				coord_actuator[1] -= 1;
+				break;
+		}
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+    }
+    
+    public void openDoorAnimation(int[] coord_actuator, int[] coord_runner, int runner_room, int num_door) {
+    	switch(num_door) {
+			case 0:
+				coord_runner[0] -= 1;
+				break;
+			case 1:
+				coord_runner[0] += 1;
+				break;
+    	}
+    	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+    	
+    	coord_runner[1] += (runner_room == 0) ? 1 : -1;
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		
+		coord_runner[1] += (runner_room == 0) ? 1 : -1;
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "Runner open the door "+num_door);
+    }
+    
+    public void changeRoomAnimation(int[] coord_actuator, int[] coord_runner, int runner_room, int num_door) {
+    	coord_runner[1] += (runner_room == 0) ? -1 : 1;
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		
+		coord_runner[1] += (runner_room == 0) ? -1 : 1;
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
+		
+		switch(num_door) {
+		case 0:
+			coord_runner[0] += 1;
+			break;
+		case 1:
+			coord_runner[0] -= 1;
+			break;
+		}
+		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "");
     }
 }

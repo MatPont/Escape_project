@@ -1,5 +1,7 @@
 package agents;
 
+import java.io.IOException;
+
 import escape_environment.Environment;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -19,14 +21,21 @@ public class Main {
 		
 		String actuator_name = "ActuatorAgent";
 		String runner_name = "RunnerAgent";
+		boolean verbose = false;
 		
 		int code_size = 4;
 		
 		Environment env = new Environment(false, code_size);
 		env.display();
+		try {
+			System.in.read();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
-		Object[] actuator_param = {runner_name, env, code_size};
-		Object[] runner_param = {actuator_name, env, code_size};
+		Object[] actuator_param = {runner_name, env, code_size, verbose};
+		Object[] runner_param = {actuator_name, env, code_size, verbose};
 		
 		try {
 			actuator = mc.createNewAgent(actuator_name, Actuator.class.getName(), actuator_param);
