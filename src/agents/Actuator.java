@@ -9,6 +9,7 @@ import jade.core.Agent;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
+import neural_network.NeuralNetwork;
 
 public class Actuator extends Agent {
 	
@@ -29,6 +30,8 @@ public class Actuator extends Agent {
 	
 	private Set<Integer> already_pushed_button = new HashSet<>();
 	
+	private NeuralNetwork neural_network;
+	
 	protected void setup() {
 		// Process parameters
 		Object args[] = getArguments();
@@ -38,6 +41,8 @@ public class Actuator extends Agent {
 		verbose = (boolean)args[3];
 		
 		code = new int[code_size][code_size];
+		
+		neural_network = new NeuralNetwork(code_size*code_size, 8, 5);
 		
 		// Declare FSM Behaviour
 		FSMBehaviour fsm = new FSMBehaviour() {
