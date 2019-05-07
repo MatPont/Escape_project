@@ -1,5 +1,6 @@
 package agents;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import neural_network.NeuralNetwork;
+import neural_network.Np;
 
 public class Actuator extends Agent {
 	
@@ -24,9 +26,15 @@ public class Actuator extends Agent {
 	private boolean verbose;
 	
 	private int code_size = 4;
-	private int[][] code = new int[code_size][code_size];
+	private double[][] code = new double[code_size][code_size];
 	private int num_button = 0;
 	private int num_door = 0;
+	private int hidden_dim = 1024;
+	private int button_dim = 5;
+	
+	private double epsilon = 0.05; //1.0;				
+	private double epsilon_min = 0.05;
+	private double epsilon_decay = 0.9;
 	
 	private Set<Integer> already_pushed_button = new HashSet<>();
 	
@@ -39,10 +47,11 @@ public class Actuator extends Agent {
 		env = (Environment)args[1];
 		code_size = (int)args[2];
 		verbose = (boolean)args[3];
+		hidden_dim = (int)args[4];
 		
-		code = new int[code_size][code_size];
+		code = new double[code_size][code_size];
 		
-		neural_network = new NeuralNetwork(code_size*code_size, 8, 5);
+		neural_network = new NeuralNetwork(code_size*code_size, hidden_dim, button_dim);
 		
 		// Declare FSM Behaviour
 		FSMBehaviour fsm = new FSMBehaviour() {
@@ -85,23 +94,48 @@ public class Actuator extends Agent {
 			content = msg.getContent();
 		return content;
 	}
+	
+	private boolean choose_to_explore() {
+		return Math.random() < epsilon;
+		//return false;
+	}
 
-	private int decipher_button(int[][] code) {
+	private int decipher_button(double[][] code) {
 		int num_button = 0;
+		
 		do {
-			num_button = (int) (Math.random() * (4));
+			if(choose_to_explore()) {
+				num_button = (int) (Math.random() * (button_dim - 1));	
+			}else {
+				code = Np.code_to_input(code, code_size);
+				num_button = this.neural_network.forward_argmax(code);
+			}
 		}while(already_pushed_button.contains(num_button));
 		
-		already_pushed_button.add(num_button);
+		for(int i = 0 ; i < 50000 ; ++i)
+			this.neural_network.run_mini_batch();
+		
+		already_pushed_button.add(num_button);		
+		
+		epsilon = Math.max(epsilon*epsilon_decay, epsilon_min);
 		
 		return num_button;
 	}
 	
-	private int decipher_door(int[][] code) {
+	private int decipher_door(double[][] code) {
 		//int num_door = 0;
 		int num_door = (int) (Math.random() * (2));
 		
 		return num_door;
+	}
+	
+	private void add_to_memory(double[][] code, int num_button) {
+		double[] code_f = Np.flatten(code);
+		
+		double[] y = new double[button_dim];
+		y[num_button] = 1;
+		
+		this.neural_network.add_to_memory(code_f, y);
 	}
 	
 	/* ==================
@@ -118,8 +152,9 @@ public class Actuator extends Agent {
 			// Parse code
 			int i = 0;
 			int j = 0;
+			
 			for(String c : split_code) {
-				code[i][j] = Integer.parseInt(c);
+				code[i][j] = Double.parseDouble(c);
 				j += 1;
 				if(j >= code_size){
 					i = (i + 1) % code_size;
@@ -150,8 +185,10 @@ public class Actuator extends Agent {
 			
 			// Action
 			exit_value = env.pressButton(num_button);
-			if(exit_value == 1) 
+			if(exit_value == 1) {
 				num_door = decipher_door(code);
+				add_to_memory(code, num_button);
+			}
 		}
 		
 		public int onEnd() {

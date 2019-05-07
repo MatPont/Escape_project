@@ -344,6 +344,30 @@ public class Np {
         return flat;
     }
     
+    public static int argmax(double[] tab) {
+    	double value_max = Double.MIN_VALUE;
+    	int arg = -1;
+    	
+    	for(int i = 0 ; i < tab.length ; ++i) {
+    		double val = tab[i];
+    		if(val > value_max) {
+    			value_max = val;
+    			arg = i;
+    		}	
+    	}
+    	
+    	return arg;
+    }
+    
+    public static double[][] code_to_input(double[][] code, int code_size){
+    	double[] code_f = Np.flatten(code);
+		code = new double[1][code_size * code_size];
+		code[0] = code_f;
+		code = Np.T(code);
+		
+		return code;
+    }
+    
     
     
     /**

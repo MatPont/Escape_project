@@ -28,7 +28,8 @@ public class ReplayMemory {
 		X[index] = x;
 		Y[index] = y;
 		index = (index + 1) % memory_capacity;
-		++memory_size;
+		if(memory_size < memory_capacity)
+			++memory_size;
 	}
 	
 	public int[] random(int n) {
@@ -67,7 +68,6 @@ public class ReplayMemory {
 		for(int i = 0 ; i < batch_size; ++i)
 			batch[i] = Y[batch_ind[i]];
 			
-		
 		return Np.T(batch);
 	}
 

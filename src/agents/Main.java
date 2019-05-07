@@ -24,8 +24,9 @@ public class Main {
 		boolean verbose = false;
 		
 		int code_size = 4;
+		int hidden_dim = 8;
 		
-		Environment env = new Environment(false, code_size);
+		Environment env = new Environment(false, code_size, hidden_dim);
 		env.display();
 		System.out.println("Press a key to run the game!");
 		try {
@@ -36,7 +37,7 @@ public class Main {
 		}
 		
 		
-		Object[] actuator_param = {runner_name, env, code_size, verbose};
+		Object[] actuator_param = {runner_name, env, code_size, verbose, hidden_dim};
 		Object[] runner_param = {actuator_name, env, code_size, verbose};
 		
 		try {

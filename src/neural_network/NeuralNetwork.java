@@ -35,24 +35,48 @@ public class NeuralNetwork {
 		this.output_dim = output_dim;
 		
 		this.memory = new ReplayMemory(5000, input_dim, output_dim);
+		
+		// Add data
+		/*int code_size = (int)Math.sqrt(input_dim);
+		double[][] code = new double[code_size][code_size];
+		for(int i = 0 ; i < 5000; ++i) {
+			code = Np.random(code_size, code_size);
+			int num_button = (int) (Math.random() * (output_dim - 1));
+			double[] code_f = Np.flatten(code);
+			double[] y = new double[output_dim];
+			y[num_button] = 1;
+			
+			this.add_to_memory(code_f, y);
+		}*/
 	}
 	
-	public void add(double[] x, double[] y) {
+	public void randomize_bias() {
+		b1 = Np.random(hidden_dim, batch_size);
+		b2 = Np.random(hidden_dim, batch_size);
+	}
+	
+	public void add_to_memory(double[] x, double[] y) {
 		this.memory.add(x, y);
 	}
 	
 	public double[][] forward(double[][] input) {
 		double[][] z1, a1, z2, a2;
-
-		z1 = Np.add(Np.dot(input, w1), b1);		
+		
+		z1 = Np.add(Np.dot(w1, input), b1);
 		//a1 = Np.relu(z1);
 		a1 = Np.sigmoid(z1);
 		
-		z2 = Np.add(Np.dot(a1, w2), b2);
+		z2 = Np.add(Np.dot(w2, a1), b2);
 		//a2 = Np.softmax(z2);
 		a2 = Np.sigmoid(z2);
 		
 		return a2;
+	}
+	
+	public int forward_argmax(double [][] input) {
+		double[][] ouput = this.forward(input);
+		double[] output_f = Np.flatten(ouput);
+		return Np.argmax(output_f);
 	}
 	
 	public double train(double[][] input, double[][] label) {
@@ -97,6 +121,7 @@ public class NeuralNetwork {
 			double[][] batchY = memory.get_batch_y();
 			
 			cost = this.train(batchX, batchY);	
+			//System.out.println(cost);
 		}
 		
 		return cost;
@@ -118,7 +143,7 @@ public class NeuralNetwork {
 		System.out.println(Np.shape(Y));
         
         for(int i = 0 ; i < X.length ; ++i) {
-        	nn.add(X[i], Y[i]);
+        	nn.add_to_memory(X[i], Y[i]);
         }
         
         X = Np.T(X);

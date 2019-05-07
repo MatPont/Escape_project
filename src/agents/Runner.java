@@ -1,5 +1,7 @@
 package agents;
 
+import java.io.IOException;
+
 import escape_environment.Environment;
 import jade.core.AID;
 import jade.core.Agent;
@@ -20,7 +22,7 @@ public class Runner extends Agent {
 	private boolean verbose;
 	
 	private int code_size;
-	private int[][] code;
+	private double[][] code;
 	int num_door = 0;
 	
 	protected void setup() {
@@ -31,7 +33,7 @@ public class Runner extends Agent {
 		code_size = (int)args[2];
 		verbose = (boolean)args[3];
 		
-		code = new int[code_size][code_size];
+		code = new double[code_size][code_size];
 		
 		// Declare FSM Behaviour
 		FSMBehaviour fsm = new FSMBehaviour() {
@@ -102,9 +104,11 @@ public class Runner extends Agent {
 			
 			// Action			
 			String string_code = "";
-			for(int[] code_line : code) 
-				for(int c : code_line) 
+			for(double[] code_line : code) 
+				for(double c : code_line) {
 					string_code += c+",";
+				}
+			
 			sendMessage(actuator_agent_name, string_code);
 		}
 	}

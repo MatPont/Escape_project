@@ -11,7 +11,7 @@ package neural_network;
 
 import java.util.Arrays;
 
-public class NN {
+public class NN_example {
  
    public static void main(String[] args) {
  

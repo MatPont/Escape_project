@@ -1,21 +1,27 @@
 package escape_environment;
 
+import neural_network.NeuralNetwork;
+import neural_network.Np;
+
 public class Environment {
 	
-	boolean use_FX_Viewer;
-	Viewer viewer;
+	private boolean use_FX_Viewer;
+	private Viewer viewer;
 	
-	int[] coord_actuator = new int[2];
-	int[] coord_runner = new int[2];
+	private int[] coord_actuator = new int[2];
+	private int[] coord_runner = new int[2];
 	
-	int runner_room;
-	int num_button;
-	int code_size;
+	private int runner_room;
+	private int num_button;
+	private int code_size;
 	
-	int real_button = 0;
-	int real_door = 0;
+	private int real_button = 0;
+	private int real_door = 0;
+	private int hidden_dim = 8;
 	
-	public Environment(boolean use_FX_Viewer, int code_size) {
+	//private NeuralNetwork neural_network;
+	
+	public Environment(boolean use_FX_Viewer, int code_size, int hidden_dim) {
 		this.use_FX_Viewer = use_FX_Viewer;
 		if(use_FX_Viewer)
 			this.viewer = new FXViewer();
@@ -31,6 +37,11 @@ public class Environment {
 		
 		this.runner_room = 0;
 		this.num_button = -1;
+		
+		this.hidden_dim = hidden_dim;
+		
+		/*neural_network = new NeuralNetwork(code_size*code_size, hidden_dim, 5);
+		neural_network.randomize_bias();*/
 	}
 	
 	public void init_coord_runner() {
@@ -48,10 +59,14 @@ public class Environment {
 		return result;
 	}
 	
-	public int[][] getCode(){
-		int[][] code = new int[code_size][code_size];
+	public double[][] getCode(){
+		double[][] code = new double[code_size][code_size];
+		code = Np.random(code_size, code_size);
 		
 		this.real_button = (int) (Math.random() * (4));
+		//code = Np.code_to_input(code, code_size);
+		//this.real_button = neural_network.forward_argmax(code);
+		
 		this.real_door = (int) (Math.random() * (2));
 		
 		viewer.getCodeAnimation(coord_actuator, coord_runner, runner_room);
