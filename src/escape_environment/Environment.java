@@ -17,9 +17,8 @@ public class Environment {
 	
 	private int real_button = 0;
 	private int real_door = 0;
-	private int hidden_dim = 8;
-	
-	//private NeuralNetwork neural_network;
+	private int hidden_dim;
+	private int button_dim = 5;
 	
 	public Environment(boolean use_FX_Viewer, int code_size, int hidden_dim) {
 		this.use_FX_Viewer = use_FX_Viewer;
@@ -39,9 +38,6 @@ public class Environment {
 		this.num_button = -1;
 		
 		this.hidden_dim = hidden_dim;
-		
-		/*neural_network = new NeuralNetwork(code_size*code_size, hidden_dim, 5);
-		neural_network.randomize_bias();*/
 	}
 	
 	public void init_coord_runner() {
@@ -62,12 +58,13 @@ public class Environment {
 	public double[][] getCode(){
 		double[][] code = new double[code_size][code_size];
 		code = Np.random(code_size, code_size);
+		code = Np.multiply(5, code);
 		
-		this.real_button = (int) (Math.random() * (4));
-		//code = Np.code_to_input(code, code_size);
-		//this.real_button = neural_network.forward_argmax(code);
+		//this.real_button = (int) (Math.random() * (4));
+		this.real_button = (int)Np.sum(code) % button_dim; 
 		
-		this.real_door = (int) (Math.random() * (2));
+		//this.real_door = (int) (Math.random() * (2));
+		this.real_door = 0;
 		
 		viewer.getCodeAnimation(coord_actuator, coord_runner, runner_room);
 		

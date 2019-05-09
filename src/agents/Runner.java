@@ -69,7 +69,11 @@ public class Runner extends Agent {
 	
 	private String receiveMessage() {
 		//System.out.println("2 - doWait before");
-		doWait();
+		ACLMessage msg = receive();
+		if(msg == null) {
+			doWait();
+			msg = receive();	
+		}
 		//System.out.println("2 - doWait after");
 		
 		/*try {
@@ -79,7 +83,7 @@ public class Runner extends Agent {
 			e.printStackTrace();
 		}*/
 		
-		ACLMessage msg = receive();
+		//ACLMessage msg = receive();
 		String content = "";
 		if(msg != null)
 			content = msg.getContent();

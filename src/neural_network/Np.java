@@ -1,5 +1,6 @@
 package neural_network;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -337,7 +338,7 @@ public class Np {
         
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                flat[i*j] = x[i][j];
+                flat[i*n+j] = x[i][j];
             }
         }
         
@@ -366,6 +367,36 @@ public class Np {
 		code = Np.T(code);
 		
 		return code;
+    }
+    
+    public static double sum(double[][] input) {
+    	double sum = 0;
+    	
+    	for(double[] t_input : input)
+    		for(double t_t_input : t_input)
+    			sum += t_t_input;
+    	
+    	return sum;
+    }
+    
+    public static void display(double[][] a) {
+    	String all = "";
+    	for(double[] t_a : a) {
+    		for(double t_t_a : t_a)
+    			all += Double.toString(t_t_a) + " ";
+    		all += "\n";
+    	}
+    	
+    	System.out.println(all);
+    }
+    
+    public static void display(double[] a) {
+    	String all = "";
+		for(double t_t_a : a)
+			all += Double.toString(t_t_a) + " ";
+		all += "\n";
+    	
+    	System.out.println(all);
     }
     
     
@@ -398,6 +429,27 @@ public class Np {
         return -sum / batch_size;
     }
     
+    public static double mean_squared_error(int batch_size, double[][] Y, double[][] A) {
+    	int m = A.length;
+        int n = A[0].length;
+        double[][] z = new double[m][n];
+        
+        z = Np.multiply(0.5, Np.power(Np.subtract(Y, A), 2));
+
+        double sum = Np.sum(z);
+
+        return sum / batch_size;
+    }
+    
+    public static void pause() {
+    	try {
+			System.in.read();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
     /**
      * @param a matrix
      * @return sigmoid of matrix a
@@ -410,6 +462,19 @@ public class Np {
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 z[i][j] = (1.0 / (1 + Math.exp(-a[i][j])));
+            }
+        }
+        return z;
+    }
+    
+    public static double[][] sigmoid_derivative(double[][] a) {
+        int m = a.length;
+        int n = a[0].length;
+        double[][] z = new double[m][n];
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                z[i][j] = (a[i][j] / (1 - a[i][j]));
             }
         }
         return z;

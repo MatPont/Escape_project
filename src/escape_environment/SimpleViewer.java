@@ -11,7 +11,7 @@ public class SimpleViewer implements Viewer {
 	private final static String empty = " ";
 	private final static String code = "C";
 	
-	private final static long pause_time = 250;
+	private final static long pause_time = 200;
 	
 	public SimpleViewer() {
 		super();

@@ -23,8 +23,8 @@ public class Main {
 		String runner_name = "RunnerAgent";
 		boolean verbose = false;
 		
-		int code_size = 4;
-		int hidden_dim = 8;
+		int code_size = 1;
+		int hidden_dim = 64;
 		
 		Environment env = new Environment(false, code_size, hidden_dim);
 		env.display();

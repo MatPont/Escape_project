@@ -1,5 +1,7 @@
 package agents;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,11 +27,12 @@ public class Actuator extends Agent {
 	private Environment env;
 	private boolean verbose;
 	
-	private int code_size = 4;
+	private int code_size = 1;
 	private double[][] code = new double[code_size][code_size];
 	private int num_button = 0;
 	private int num_door = 0;
-	private int hidden_dim = 1024;
+	private int num_try = 0;
+	private int hidden_dim;
 	private int button_dim = 5;
 	
 	private double epsilon = 0.05; //1.0;				
@@ -38,7 +41,7 @@ public class Actuator extends Agent {
 	
 	private Set<Integer> already_pushed_button = new HashSet<>();
 	
-	private NeuralNetwork neural_network;
+	private NeuralNetwork button_neural_network;
 	
 	protected void setup() {
 		// Process parameters
@@ -51,7 +54,7 @@ public class Actuator extends Agent {
 		
 		code = new double[code_size][code_size];
 		
-		neural_network = new NeuralNetwork(code_size*code_size, hidden_dim, button_dim);
+		button_neural_network = new NeuralNetwork(code_size*code_size, hidden_dim, button_dim);
 		
 		// Declare FSM Behaviour
 		FSMBehaviour fsm = new FSMBehaviour() {
@@ -87,8 +90,11 @@ public class Actuator extends Agent {
 	}
 	
 	private String receiveMessage() {
-		doWait();
 		ACLMessage msg = receive();
+		if(msg == null) {
+			doWait();
+			msg = receive();
+		}
 		String content = "";
 		if(msg != null)
 			content = msg.getContent();
@@ -103,28 +109,42 @@ public class Actuator extends Agent {
 	private int decipher_button(double[][] code) {
 		int num_button = 0;
 		
+		int cpt = 0;
+		
 		do {
-			if(choose_to_explore()) {
-				num_button = (int) (Math.random() * (button_dim - 1));	
-			}else {
+			if(cpt < 5) {
 				code = Np.code_to_input(code, code_size);
-				num_button = this.neural_network.forward_argmax(code);
+				num_button = this.button_neural_network.forward_argmax(code);
+				//System.out.println(num_button);
+				
+				if(already_pushed_button.contains(num_button)) {				
+					for(int i = 0 ; i < 32 ; ++i)
+						this.button_neural_network.run_mini_batch();
+				}
+				
+				cpt++;	
+			}
+			else {
+				num_button = (int) (Math.random() * (button_dim));
 			}
 		}while(already_pushed_button.contains(num_button));
-		
-		for(int i = 0 ; i < 50000 ; ++i)
-			this.neural_network.run_mini_batch();
-		
 		already_pushed_button.add(num_button);		
 		
+		for(int i = 0 ; i < 32 ; ++i)
+			this.button_neural_network.run_mini_batch();
+		
+		//this.button_neural_network.generate_memory(50000);
+		
 		epsilon = Math.max(epsilon*epsilon_decay, epsilon_min);
+		
+		num_try++;
 		
 		return num_button;
 	}
 	
 	private int decipher_door(double[][] code) {
-		//int num_door = 0;
-		int num_door = (int) (Math.random() * (2));
+		int num_door = 0;
+		//int num_door = (int) (Math.random() * (2));
 		
 		return num_door;
 	}
@@ -135,7 +155,7 @@ public class Actuator extends Agent {
 		double[] y = new double[button_dim];
 		y[num_button] = 1;
 		
-		this.neural_network.add_to_memory(code_f, y);
+		this.button_neural_network.add_to_memory(code_f, y);
 	}
 	
 	/* ==================
@@ -147,7 +167,7 @@ public class Actuator extends Agent {
 			
 			// Action
 			String msg_code = receiveMessage();
-			if(verbose) System.out.println("door "+msg_code);
+			if(verbose) System.out.println("code "+msg_code);
 			String[] split_code = msg_code.split(",");
 			// Parse code
 			int i = 0;
@@ -164,6 +184,7 @@ public class Actuator extends Agent {
 				}
 			}
 			
+			num_try = 0;
 			already_pushed_button.clear();
 		}		
 	}
@@ -199,6 +220,18 @@ public class Actuator extends Agent {
 	private class SendDoorNumber extends OneShotBehaviour {
 		public void action() {
 			if(verbose) System.out.println(getName()+" - "+STATE_D);
+			
+			BufferedWriter writer;
+			try {
+				writer = new BufferedWriter(new FileWriter("./samplefile.txt", true));
+				writer.newLine();   //Add new line
+				writer.write(Integer.toString(num_try));
+				writer.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			//System.out.println(num_try);
 			
 			// Action			
 			String string_door = String.valueOf(num_door);
