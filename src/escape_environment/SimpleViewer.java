@@ -11,7 +11,9 @@ public class SimpleViewer implements Viewer {
 	private final static String empty = " ";
 	private final static String code = "C";
 	
-	private final static long pause_time = 200;
+	private final static long pause_time = 250;
+	
+	private int score = 0;
 	
 	public SimpleViewer() {
 		super();
@@ -32,14 +34,14 @@ public class SimpleViewer implements Viewer {
 	}
 	
 	public void display_message_pause(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button, String message, long pause) {
-		this.display(coord_actuator, coord_runner, runner_room, num_button);
+		this.display(coord_actuator, coord_runner, runner_room, num_button, score);
     	System.out.println(message);
     	this.pause(pause);
 	}
 	
 	// ======= Viewer implementation =======
-    public void display(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button) {
-    	int num_row = 5;
+    public void display(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button, int score) {
+    	int num_row = 6;
     	
     	this.clearScreen();
     	String[] lines = new String[num_row];
@@ -64,10 +66,13 @@ public class SimpleViewer implements Viewer {
     		}else if(i == 2) {
     			lines[i] += wall+empty+empty+empty+empty+empty+wall;
     			lines[i] += empty;
-    			if(runner_room == 0) 
-    				lines[i] += wall+empty+empty+code;	
-    			else 
+    			if(runner_room == 0) {
+    				lines[i] += wall+empty+empty+code;
+    				//lines[i] += "\t\t";
+    			}else 
     				lines[i] += empty+empty+empty+code+empty+empty+wall;
+    			
+    			lines[i] += "\t  score:" + score;
     		}else if(i == 3) {
     			lines[i] += wall+empty+empty+empty+empty+empty+wall;
     			lines[i] += empty; 
@@ -96,7 +101,7 @@ public class SimpleViewer implements Viewer {
     	coord_runner[1] += (runner_room == 0) ? 1 : -1;
     	this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "the code was obtained by the Runner!", pause_time);
     	coord_runner[1] += (runner_room == 0) ? -1 : 1;
-    	this.display(coord_actuator, coord_runner, runner_room, -1);
+    	this.display(coord_actuator, coord_runner, runner_room, -1, score);
     }
     
     public void pressButtonAnimation(int[] coord_actuator, int[] coord_runner, int runner_room, int num_button, boolean good_button) {
@@ -202,5 +207,9 @@ public class SimpleViewer implements Viewer {
 			break;
 		}
 		this.display_message_pause(coord_actuator, coord_runner, runner_room, -1, "", pause_time);
+    }
+    
+    public void setScore(int score){
+    	this.score = score;
     }
 }

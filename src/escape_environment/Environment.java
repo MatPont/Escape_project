@@ -5,6 +5,9 @@ import neural_network.Np;
 
 public class Environment {
 	
+	private final static int door_reward = 3;
+	private final static int button_penality = -1;
+	
 	private boolean use_FX_Viewer;
 	private Viewer viewer;
 	
@@ -19,6 +22,9 @@ public class Environment {
 	private int real_door = 0;
 	private int hidden_dim;
 	private int button_dim = 5;
+	private int door_dim = 2;
+	
+	private int score = 0;
 	
 	public Environment(boolean use_FX_Viewer, int code_size, int hidden_dim) {
 		this.use_FX_Viewer = use_FX_Viewer;
@@ -52,6 +58,9 @@ public class Environment {
 		this.num_button = num_button;
 		viewer.pressButtonAnimation(coord_actuator, coord_runner, runner_room, num_button, good_button);
 		
+		if(! good_button)
+			this.addScore(button_penality);
+		
 		return result;
 	}
 	
@@ -64,7 +73,8 @@ public class Environment {
 		this.real_button = (int)Np.sum(code) % button_dim; 
 		
 		//this.real_door = (int) (Math.random() * (2));
-		this.real_door = 0;
+		//this.real_door = 0;
+		this.real_door = (int)Np.sum(code) % door_dim;
 		
 		viewer.getCodeAnimation(coord_actuator, coord_runner, runner_room);
 		
@@ -78,9 +88,12 @@ public class Environment {
 		viewer.openDoorAnimation(coord_actuator, coord_runner, runner_room, num_door, good_door);
 		
 		if(result == 1) {
+			this.addScore(door_reward);
 			runner_room = (runner_room + 1) % 2;
 			viewer.changeRoomAnimation(coord_actuator, coord_runner, runner_room, num_door);
 		} else {
+			score = 0;
+			this.viewer.setScore(score);
 			runner_room = 0;
 			this.init_coord_runner();
 			this.display();
@@ -90,7 +103,22 @@ public class Environment {
 		return result;
 	}
 	
+	public void setScore(int score) {
+		this.score = score;
+		this.viewer.setScore(score);
+	}
+	
+	public void addScore(int n) {
+		score += n;
+		this.viewer.setScore(score);
+	}
+	
+	public void subScore(int n) {
+		score -= n;
+		this.viewer.setScore(score);
+	}
+	
 	public void display() {
-		this.viewer.display(coord_actuator, coord_runner, runner_room, num_button);
+		this.viewer.display(coord_actuator, coord_runner, runner_room, num_button, score);
 	}
 }

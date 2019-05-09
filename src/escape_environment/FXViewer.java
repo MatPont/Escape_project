@@ -20,7 +20,7 @@ public class FXViewer extends Application implements Viewer {
     }
     
     // ======= Viewer implementation =======
-    public void display(int[] coord_actuator, int[] coord_runner, int runner_room, int switch_on) {
+    public void display(int[] coord_actuator, int[] coord_runner, int runner_room, int switch_on, int score) {
     	
     }
     
@@ -41,6 +41,10 @@ public class FXViewer extends Application implements Viewer {
     }
     
     public void pause(long time) {
+    	
+    }
+    
+    public void setScore(int score) {
     	
     }
 }

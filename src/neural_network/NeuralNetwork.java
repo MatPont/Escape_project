@@ -1,6 +1,8 @@
 package neural_network;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NeuralNetwork {
 	
@@ -49,6 +51,26 @@ public class NeuralNetwork {
 		}*/
 	}
 	
+	public void generate_memory_unique() {
+		double[][] code = new double[1][input_dim];
+		for(int i = 0 ; i < output_dim ; ++i) {
+			int num_out = -1;
+			do {
+				code = Np.random(1, input_dim);
+				code = Np.multiply(5, code);
+				double sum = Np.sum(code);
+				num_out = (int)sum % output_dim;
+			}while(num_out != i);
+			double[] code_f = Np.flatten(code);
+			double[] y = new double[output_dim];
+			y[num_out] = 1;
+			
+			this.add_to_memory(code_f, y);
+		}
+		
+		//Np.pause();
+	}
+	
 	public void generate_memory(int n) {
 		int[] num_classes = new int[5];
 		
@@ -64,15 +86,15 @@ public class NeuralNetwork {
 			if(max < sum) max = sum;
 			if(min > sum) min = sum;
 			
-			int num_button = (int)sum % output_dim;
+			int num_out = (int)sum % output_dim;
 			
 			double[] code_f = Np.flatten(code);
 			double[] y = new double[output_dim];
-			y[num_button] = 1;
+			y[num_out] = 1;
 			
 			this.add_to_memory(code_f, y);
 			
-			num_classes[num_button]++;
+			num_classes[num_out]++;
 		}
 		
 		/*System.out.println(max);

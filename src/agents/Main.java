@@ -38,7 +38,7 @@ public class Main {
 		
 		
 		Object[] actuator_param = {runner_name, env, code_size, verbose, hidden_dim};
-		Object[] runner_param = {actuator_name, env, code_size, verbose};
+		Object[] runner_param = {actuator_name, env, code_size, verbose, hidden_dim};
 		
 		try {
 			actuator = mc.createNewAgent(actuator_name, Actuator.class.getName(), actuator_param);

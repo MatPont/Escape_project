@@ -8,6 +8,8 @@ import jade.core.Agent;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
+import neural_network.NeuralNetwork;
+import neural_network.Np;
 
 public class Runner extends Agent {
 
@@ -25,6 +27,11 @@ public class Runner extends Agent {
 	private double[][] code;
 	int num_door = 0;
 	
+	private int hidden_dim;
+	private int door_dim = 2;
+	
+	private NeuralNetwork door_neural_network;
+	
 	protected void setup() {
 		// Process parameters
 		Object args[] = getArguments();
@@ -32,8 +39,13 @@ public class Runner extends Agent {
 		env = (Environment)args[1];
 		code_size = (int)args[2];
 		verbose = (boolean)args[3];
+		hidden_dim = (int)args[4];
 		
 		code = new double[code_size][code_size];
+		
+		door_neural_network = new NeuralNetwork(code_size*code_size, hidden_dim, door_dim);
+		//door_neural_network.generate_memory_unique();
+		door_neural_network.generate_memory(50000);
 		
 		// Declare FSM Behaviour
 		FSMBehaviour fsm = new FSMBehaviour() {
@@ -89,6 +101,14 @@ public class Runner extends Agent {
 			content = msg.getContent();
 		return content;
 	}
+	
+	private void add_to_memory(double[][] code, int num_door) {
+		double[] code_f = Np.flatten(code);
+		
+		double[] y = new double[door_dim];
+		y[num_door] = 1;
+		this.door_neural_network.add_to_memory(code_f, y);
+	}
 
 	/* ==================
 	   ===== STATES =====
@@ -125,6 +145,9 @@ public class Runner extends Agent {
 			String msg_door = receiveMessage();
 			if(verbose) System.out.println("door "+msg_door);
 			num_door = Integer.parseInt(msg_door);
+			
+			double[][] t_code = Np.code_to_input(code, code_size);
+			num_door = door_neural_network.forward_argmax(t_code);
 		}
 	}
 	
@@ -133,7 +156,15 @@ public class Runner extends Agent {
 			if(verbose) System.out.println(getName()+" - "+STATE_D);
 			
 			// Action			
-			int result = env.openDoor(num_door);
+			int result = env.openDoor(num_door); // return 1 if good door
+			
+			result = (result + 1) % 2; 
+			
+			int correct_door = (num_door + result) % 2;
+			
+			add_to_memory(code, correct_door);
+			for(int i = 0 ; i < 512 ; ++i)
+				door_neural_network.run_mini_batch();
 			
 		}
 	}

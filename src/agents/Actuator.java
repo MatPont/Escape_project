@@ -55,6 +55,8 @@ public class Actuator extends Agent {
 		code = new double[code_size][code_size];
 		
 		button_neural_network = new NeuralNetwork(code_size*code_size, hidden_dim, button_dim);
+		//button_neural_network.generate_memory_unique();
+		button_neural_network.generate_memory(50000);
 		
 		// Declare FSM Behaviour
 		FSMBehaviour fsm = new FSMBehaviour() {
@@ -118,7 +120,7 @@ public class Actuator extends Agent {
 				//System.out.println(num_button);
 				
 				if(already_pushed_button.contains(num_button)) {				
-					for(int i = 0 ; i < 32 ; ++i)
+					for(int i = 0 ; i < 512 ; ++i)
 						this.button_neural_network.run_mini_batch();
 				}
 				
@@ -130,7 +132,7 @@ public class Actuator extends Agent {
 		}while(already_pushed_button.contains(num_button));
 		already_pushed_button.add(num_button);		
 		
-		for(int i = 0 ; i < 32 ; ++i)
+		for(int i = 0 ; i < 512 ; ++i)
 			this.button_neural_network.run_mini_batch();
 		
 		//this.button_neural_network.generate_memory(50000);
@@ -146,6 +148,8 @@ public class Actuator extends Agent {
 		int num_door = 0;
 		//int num_door = (int) (Math.random() * (2));
 		
+		num_button = this.button_neural_network.forward_argmax(code);
+		
 		return num_door;
 	}
 	
@@ -154,7 +158,6 @@ public class Actuator extends Agent {
 		
 		double[] y = new double[button_dim];
 		y[num_button] = 1;
-		
 		this.button_neural_network.add_to_memory(code_f, y);
 	}
 	
